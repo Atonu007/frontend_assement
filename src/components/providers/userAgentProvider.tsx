@@ -21,7 +21,7 @@ type UserAgentContextType = {
 
 type UserAgentProviderProps = {
   children: ReactNode;
-  userAgent?: UserAgent;
+  userAgent?: UserAgent; // Optional prop for SSR
 };
 
 const UserAgentContext = createContext<UserAgentContextType | undefined>(
@@ -45,7 +45,7 @@ export const UserAgentProvider: React.FC<UserAgentProviderProps> = ({
   );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return; // Only run on client-side
     setUserAgent(window.navigator.userAgent);
   }, []);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Product } from "@/types";
 import { ProductModal } from "@/views/products/productModal/productModal";
 import { BackToHome } from "@/components/backToHome/backToHome";
@@ -18,12 +18,49 @@ export const Products: React.FC = () => {
     handlePageChange,
   } = usePagination({ items: PRODUCTS_DATA, itemsPerPage: 5 });
 
+  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productIdFromUrl = urlParams.get("product-id");
+
+    if (productIdFromUrl) {
+      const product = PRODUCTS_DATA.find((p) => p.id === productIdFromUrl);
+      if (product) {
+        setSelectedProduct(product);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productIdFromUrl = urlParams.get("product-id");
+
+      if (productIdFromUrl) {
+        const product = PRODUCTS_DATA.find((p) => p.id === productIdFromUrl);
+        setSelectedProduct(product || null);
+      } else {
+        setSelectedProduct(null);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
   const handleOpenModal = useCallback((product: Product) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("product-id", product.id); 
+    window.history.pushState({}, "", `/products?${urlParams.toString()}`); 
     setSelectedProduct(product);
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setSelectedProduct(null);
+    window.history.pushState({}, "", "/products"); 
   }, []);
 
   return (
